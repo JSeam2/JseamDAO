@@ -15,8 +15,9 @@ contract Timelock {
     event ExecuteTransaction(bytes32 indexed txHash, address indexed target, uint value, string signature,  bytes data, uint eta);
     event QueueTransaction(bytes32 indexed txHash, address indexed target, uint value, string signature, bytes data, uint eta);
 
-    uint public constant GRACE_PERIOD = 14 days;
-    uint public constant MINIMUM_DELAY = 2 days;
+    // Please change, these values are for testing purposes
+    uint public constant GRACE_PERIOD = 1 minutes;
+    uint public constant MINIMUM_DELAY = 1 minutes;
     uint public constant MAXIMUM_DELAY = 30 days;
 
     address public admin;
@@ -26,7 +27,7 @@ contract Timelock {
     mapping (bytes32 => bool) public queuedTransactions;
 
 
-    constructor(address admin_, uint delay_) public {
+    constructor(address admin_, uint delay_) {
         require(delay_ >= MINIMUM_DELAY, "Timelock::constructor: Delay must exceed minimum delay.");
         require(delay_ <= MAXIMUM_DELAY, "Timelock::setDelay: Delay must not exceed maximum delay.");
 
@@ -34,7 +35,7 @@ contract Timelock {
         delay = delay_;
     }
 
-    function() external payable { }
+    receive() external payable { }
 
     function setDelay(uint delay_) public {
         require(msg.sender == address(this), "Timelock::setDelay: Call must come from Timelock.");
@@ -99,7 +100,7 @@ contract Timelock {
         }
 
         // solium-disable-next-line security/no-call-value
-        (bool success, bytes memory returnData) = target.call.value(value)(callData);
+        (bool success, bytes memory returnData) = target.call{value: value}(callData);
         require(success, "Timelock::executeTransaction: Transaction execution reverted.");
 
         emit ExecuteTransaction(txHash, target, value, signature, data, eta);

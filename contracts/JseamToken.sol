@@ -17,10 +17,10 @@ contract JseamToken {
     /// @notice Total number of tokens in circulation
     uint public constant totalSupply = 69420e18; // 69420 JSEAM
 
-    /// @notice Allowance amounts on behalf of others
+    // Allowance amounts on behalf of others
     mapping (address => mapping (address => uint96)) internal allowances;
 
-    /// @notice Official record of token balances for each account
+    // Official record of token balances for each account
     mapping (address => uint96) internal balances;
 
     /// @notice A record of each accounts delegate
@@ -63,7 +63,7 @@ contract JseamToken {
      * @notice Construct a new Jseam token
      * @param account The initial account to grant all the tokens
      */
-    constructor(address account) public {
+    constructor(address account) {
         balances[account] = uint96(totalSupply);
         emit Transfer(address(0), account, totalSupply);
     }
@@ -168,7 +168,7 @@ contract JseamToken {
         address signatory = ecrecover(digest, v, r, s);
         require(signatory != address(0), "JseamToken::delegateBySig: invalid signature");
         require(nonce == nonces[signatory]++, "JseamToken::delegateBySig: invalid nonce");
-        require(now <= expiry, "JseamToken::delegateBySig: signature expired");
+        require(block.timestamp <= expiry, "JseamToken::delegateBySig: signature expired");
         return _delegate(signatory, delegatee);
     }
 
